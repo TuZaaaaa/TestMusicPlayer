@@ -353,9 +353,12 @@ public class OnlineMusicActivity extends AppCompatActivity implements View.OnCli
 
     // 获取在线音乐
     private void getOlineMusic() {
-
+//        云服务器的IP
+        String cloudIP="http://120.46.143.167:3000";
+//        一次寻找歌曲的个数
+        int SongNums=30;
         Request request = new Request.Builder()
-                .url("https://service-8h8e4f0m-1309129255.gz.tencentapigw.com/release/playlist/track/all?id=24381616&limit=30&offset=1")
+                .url(cloudIP+"/playlist/track/all?id=24381616&limit=30&offset=1/playlist/track/all?id=24381616&limit="+SongNums+"&offset=1")
                 .build();
 //        Call call=client.newCall(request);
 //        Log.i("call", call.toString());
@@ -363,6 +366,7 @@ public class OnlineMusicActivity extends AppCompatActivity implements View.OnCli
             @Override
             public void onFailure(Call call, IOException e) {
                 Log.i("dingwei","网络错误");
+                e.printStackTrace(); // 打印详细的错误信息
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -389,7 +393,7 @@ public class OnlineMusicActivity extends AppCompatActivity implements View.OnCli
 
                         String id = song.getString("id");
 //                        String songurl = "https://api.itooi.cn/netease/url?id=" + id + "&quality=128";
-                        String songurl = "https://service-8h8e4f0m-1309129255.gz.tencentapigw.com/release/song/url/v1?id="+id+",33894312&level=lossless";
+                        String songurl =cloudIP+ "/song/url/v1?id="+id+",33894312&level=lossless";
                         String name = song.getString("name");
 //                        String singer = "";
                         JSONArray ar = new JSONArray(song.getString("ar"));
