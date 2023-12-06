@@ -11,6 +11,7 @@ import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
+import android.util.Log;
 
 import com.example.simplemusic.bean.Music;
 import com.example.simplemusic.util.Utils;
@@ -260,9 +261,18 @@ public class MusicService extends Service {
         try {
             player.reset();
             //设置播放音乐的地址
-            player.setDataSource(MusicService.this, Uri.parse(item.songUrl));
+//            Log.i("解析有问题？", "解析歌曲有问题？");
+//            player.setDataSource(MusicService.this, Uri.parse(item.songUrl));
+            player.setDataSource("http://m701.music.126.net/20231206152550/e881f47587e198b42f2509b3da9607da/jdymusic/obj/wo3DlMOGwrbDjj7DisKw/30605259365/639a/9474/6852/a1736ba8cb09c02f83f5f2c745e5f6fb.mp3");
             //准备播放音乐
             player.prepare();
+//            player.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+//                @Override
+//                public void onPrepared(MediaPlayer mediaPlayer) {
+//                    mediaPlayer.start();
+//                }
+//            });
+
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -271,15 +281,28 @@ public class MusicService extends Service {
     // 播放音乐，根据reload标志位判断是非需要重新加载音乐
     private void playMusicItem(Music item, boolean reload) {
 
+        Log.i("播放音乐", "播放音乐");
+
         if (item == null) {
             return;
         }
 
-        if (reload) {
-            //需要重新加载音乐
-            prepareToPlay(item);
+        try {
+            player.reset();
+            Log.i("songurl", item.songUrl);
+            player.setDataSource(item.songUrl);
+            //准备播放音乐
+            player.prepare();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
-        player.start();
+        player.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+                @Override
+                public void onPrepared(MediaPlayer mediaPlayer) {
+                    mediaPlayer.start();
+                }
+        });
+
         for (OnStateChangeListenr l : listenrList) {
             l.onPlay(item);
         }

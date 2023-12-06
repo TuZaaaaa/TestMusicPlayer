@@ -18,6 +18,7 @@ import android.provider.MediaStore;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
@@ -31,6 +32,7 @@ import com.example.simplemusic.bean.Music;
 import com.example.simplemusic.adapter.MusicAdapter;
 import com.example.simplemusic.adapter.PlayingMusicAdapter;
 import com.example.simplemusic.R;
+import com.example.simplemusic.db.MyMusic;
 import com.example.simplemusic.util.Utils;
 import com.example.simplemusic.service.MusicService;
 import com.example.simplemusic.db.LocalMusic;
@@ -49,7 +51,7 @@ public class LocalMusicActivity extends AppCompatActivity implements View.OnClic
     private ImageView playingImgView;
     private ImageView btnPlayOrPause;
 
-    private List<Music> localMusicList;
+    private static List<Music> localMusicList;
     private MusicAdapter adapter;
     private MusicService.MusicServiceBinder serviceBinder;
     private MusicUpdateTask updateTask;
@@ -177,8 +179,15 @@ public class LocalMusicActivity extends AppCompatActivity implements View.OnClic
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         setSupportActionBar(toolbar);
 
+//        LocalMusic localMusic = new LocalMusic("https://service-8h8e4f0m-1309129255.gz.tencentapigw.com/release/song/url/v1?id=2085833547,33894312&level=lossless", "流光过隙 Passage of an Era", "HOYO-MiX", "https://p2.music.126.net/Y8DlFQ7xFYbVclVBxQzsSA==/109951168945012044.jpg", false);
+//        localMusic.save();
+
         //从数据库获取保存的本地音乐列表
         List<LocalMusic> list = LitePal.findAll(LocalMusic.class);
+
+//        Log.i("本地音乐测试", "本地音乐测试");
+//        Log.i("list", list.toString());
+//
         for (LocalMusic s:list){
             Music m = new Music(s.songUrl, s.title, s.artist, s.imgUrl, s.isOnlineMusic);
             localMusicList.add(m);
@@ -411,6 +420,21 @@ public class LocalMusicActivity extends AppCompatActivity implements View.OnClic
         protected void onPostExecute(Void aVoid) {
             progressDialog.dismiss();
         }
+    }
+
+
+
+    /**
+     * 对外接口，下载音乐到本地
+     * @param music
+     */
+    public static void addLocalMusic(Music music) {
+        if (localMusicList.contains(music))
+            return;
+        //添加到列表和数据库
+        localMusicList.add(0, music);
+        LocalMusic localMusic = new LocalMusic(music.songUrl, music.title, music.artist, music.imgUrl, music.isOnlineMusic);
+        localMusic.save();
     }
 
     @Override

@@ -33,6 +33,7 @@ import com.example.simplemusic.util.Utils;
 import com.example.simplemusic.service.MusicService;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
@@ -101,7 +102,7 @@ public class OnlineMusicActivity extends AppCompatActivity implements View.OnCli
             @Override
             public void onClick(final int i) {
                 final Music music = onlinemusic_list.get(i);
-                final String[] items = new String[] {"收藏到我的音乐", "添加到播放列表", "删除"};
+                final String[] items = new String[] {"收藏到我的音乐", "添加到播放列表", "下载到本地", "删除"};
                 AlertDialog.Builder builder = new AlertDialog.Builder(OnlineMusicActivity.this);
                 builder.setTitle(music.title+"-"+music.artist);
 
@@ -116,6 +117,9 @@ public class OnlineMusicActivity extends AppCompatActivity implements View.OnCli
                                 serviceBinder.addPlayList(music);
                                 break;
                             case 2:
+                                LocalMusicActivity.addLocalMusic(music);
+                                break;
+                            case 3:
                                 //从列表中删除
                                 onlinemusic_list.remove(i);
                                 adapter.notifyDataSetChanged();
@@ -353,9 +357,12 @@ public class OnlineMusicActivity extends AppCompatActivity implements View.OnCli
 
     // 获取在线音乐
     private void getOlineMusic() {
-
+//        云服务器的IP
+        String cloudIP="http://120.46.143.167:3000";
+//        一次寻找歌曲的个数
+        int SongNums=30;
         Request request = new Request.Builder()
-                .url("https://service-8h8e4f0m-1309129255.gz.tencentapigw.com/release/playlist/track/all?id=24381616&limit=30&offset=1")
+                .url(cloudIP+"/playlist/track/all?id=24381616&limit="+SongNums+"&offset=1")
                 .build();
 //        Call call=client.newCall(request);
 //        Log.i("call", call.toString());
@@ -367,6 +374,7 @@ public class OnlineMusicActivity extends AppCompatActivity implements View.OnCli
                     @Override
                     public void run() {
                         Toast.makeText(OnlineMusicActivity.this, "网络错误", Toast.LENGTH_SHORT).show();
+                        e.printStackTrace(); // 打印详细的错误信息
                     }
                 });
             }
@@ -388,17 +396,30 @@ public class OnlineMusicActivity extends AppCompatActivity implements View.OnCli
                         JSONObject song = songs.getJSONObject(i);
 
                         String id = song.getString("id");
-//                        String songurl = "https://api.itooi.cn/netease/url?id=" + id + "&quality=128";
-                        String songurl = "https://service-8h8e4f0m-1309129255.gz.tencentapigw.com/release/song/url/v1?id="+id+",33894312&level=lossless";
+
+                        // 再次发送网络请求，获取歌曲地址
+                        Request request = new Request.Builder()
+                                .url(cloudIP + "/song/url/v1?id=" + id + "&level=lossless")
+                                .build();
+
+                        Response response2 = client.newCall(request).execute();
+
+                        if (!response2.isSuccessful()) throw new IOException("网络错误： " + response2);
+
+                        String result2 = response2.body().string();
+                        JSONObject jsonObject = new JSONObject(result2);
+
+                        JSONArray data = jsonObject.getJSONArray("data");
+                        JSONObject songInfo = data.getJSONObject(0);
+                        String songUrl = songInfo.getString("url");
+
                         String name = song.getString("name");
-//                        String singer = "";
                         JSONArray ar = new JSONArray(song.getString("ar"));
-                        String singer = "";
                         List<String> singerList = new ArrayList<>();
                         for(int j=0; j<ar.length(); j++){
                             singerList.add(ar.getJSONObject(j).getString("name"));
                         }
-                        singer = String.join("/", singerList);
+                        String singer = String.join("/", singerList);
                         Log.i("singer",singer);
                         String pic = "" ;
                         JSONObject al=new JSONObject(song.getString("al"));
@@ -408,7 +429,7 @@ public class OnlineMusicActivity extends AppCompatActivity implements View.OnCli
 
 
                         //实例化一首音乐并发送到主线程更新
-                        Music music = new Music(songurl, name, singer, pic, true);
+                        Music music = new Music(songUrl, name, singer, pic, true);
                         Log.i("music", music.toString());
                         Message message = mainHanlder.obtainMessage();
                         message.what = 60;
