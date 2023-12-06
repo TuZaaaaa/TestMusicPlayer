@@ -14,11 +14,13 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
-        tools:ignore="GoogleAppIndexingWarning">
+        tools:ignore="GoogleAppIndexingWarning"
+        android:networkSecurityConfig="@xml/network_security_config">
         <activity android:name="com.example.simplemusic.activity.MainActivity"/>
         <activity android:name="com.example.simplemusic.activity.LocalMusicActivity" />
         <activity android:name="com.example.simplemusic.activity.OnlineMusicActivity" />
         <activity android:name="com.example.simplemusic.activity.PlayerActivity" />
+
 
         <service
             android:name="com.example.simplemusic.service.MusicService"
