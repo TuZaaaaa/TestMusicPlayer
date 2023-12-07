@@ -117,7 +117,7 @@ public class OnlineMusicActivity extends AppCompatActivity implements View.OnCli
                                 serviceBinder.addPlayList(music);
                                 break;
                             case 2:
-                                LocalMusicActivity.addLocalMusic(music);
+                                LocalMusicActivity.addLocalMusic(OnlineMusicActivity.this, music);
                                 break;
                             case 3:
                                 //从列表中删除

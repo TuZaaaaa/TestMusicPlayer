@@ -1,6 +1,7 @@
 package com.example.simplemusic.activity;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -13,6 +14,7 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.IBinder;
 import android.provider.MediaStore;
 import android.support.v7.app.AlertDialog;
@@ -26,19 +28,21 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.example.simplemusic.bean.Music;
 import com.example.simplemusic.adapter.MusicAdapter;
 import com.example.simplemusic.adapter.PlayingMusicAdapter;
 import com.example.simplemusic.R;
-import com.example.simplemusic.db.MyMusic;
+import com.example.simplemusic.util.DownloadUtil;
 import com.example.simplemusic.util.Utils;
 import com.example.simplemusic.service.MusicService;
 import com.example.simplemusic.db.LocalMusic;
 
 import org.litepal.LitePal;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -426,16 +430,112 @@ public class LocalMusicActivity extends AppCompatActivity implements View.OnClic
 
     /**
      * 对外接口，下载音乐到本地
-     * @param music
+     *
+     * @param context 当前上下文
+     * @param music 音乐对象
      */
-    public static void addLocalMusic(Music music) {
-        if (localMusicList.contains(music))
-            return;
-        //添加到列表和数据库
-        localMusicList.add(0, music);
-        LocalMusic localMusic = new LocalMusic(music.songUrl, music.title, music.artist, music.imgUrl, music.isOnlineMusic);
-        localMusic.save();
+    public static void addLocalMusic(Activity context, Music music) {
+        Log.i("locate", "保存音乐");
+
+        List<String> filesAllName = getFilesAllName("/storage/emulated/0/music");
+
+        Log.i("locate", String.valueOf(filesAllName.size()));
+
+        Log.i("locate", "下载文件");
+        // 保存文件
+        //播放音频文件/查询本地是否存在，是则直接获取本地文件播放，否则下载播放
+        //三个参数，这里按照自己名称传，我是接口返回的所以进行了名称截取查询，第二个参数是你要保存的路径，第三个参数是类型比如音频.mp3,视频.mp4
+        if (DownloadUtil.fileIsExists(music.title, "/storage/emulated/0/music", ".mp3")) {
+            Log.i("locate", "歌曲在本地已存在");
+            Toast.makeText(context, "歌曲在本地已存在", Toast.LENGTH_SHORT).show();
+        } else {
+            // 保存歌曲文件和封面图片
+            downFile(music.title, music.songUrl, ".mp3");
+            downFile(music.title, music.imgUrl, ".jpg");
+
+            String newSongUrl = "/storage/emulated/0/music/" + music.title + ".mp3";
+            String newImgUrl = "/storage/emulated/0/image/" + music.title + ".jpg";
+
+            // 添加到列表和数据库
+//            localMusicList.add(0, music);
+            LocalMusic localMusic = new LocalMusic(newSongUrl, music.title, music.artist, newImgUrl, music.isOnlineMusic);
+            localMusic.save();
+
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+            Toast.makeText(context, "下载成功", Toast.LENGTH_SHORT).show();
+        }
     }
+
+    /**
+     * 下載文件
+     * @param name 需要保存的文件名称
+     * @param urlString 保存的网络文件路径
+     * @param type 存储目录 type 类型
+     */
+    public static void downFile(String name, String urlString, String type) {
+
+        Log.i("locate", Environment.getExternalStorageDirectory().getAbsolutePath());
+
+        DownloadUtil.get().download(urlString, Environment.getExternalStorageDirectory().getAbsolutePath() + "/image", name + type, new DownloadUtil.OnDownloadListener() {
+            @Override
+            public void onDownloadSuccess(File file) {
+//                Looper.prepare();//增加部分
+//                playSound(file.toString());//下载完成进行播放
+//                Looper.loop();//增加部分
+                Log.i("locate", "下载封面成功");
+
+            }
+
+            @Override
+            public void onDownloading(int progress) {
+//                Log.i("locate", "正在下载");
+//                progressDialog.setProgress(progress);
+            }
+
+            @Override
+            public void onDownloadFailed(Exception e) {
+                Log.i("locate", "下载失败");
+            }
+        });
+
+        DownloadUtil.get().download(urlString, Environment.getExternalStorageDirectory().getAbsolutePath() + "/music", name + type, new DownloadUtil.OnDownloadListener() {
+            @Override
+            public void onDownloadSuccess(File file) {
+//                Looper.prepare();//增加部分
+//                playSound(file.toString());//下载完成进行播放
+//                Looper.loop();//增加部分
+                Log.i("locate", "下载歌曲成功");
+
+            }
+
+            @Override
+            public void onDownloading(int progress) {
+//                Log.i("locate", "正在下载");
+//                progressDialog.setProgress(progress);
+            }
+
+            @Override
+            public void onDownloadFailed(Exception e) {
+                Log.i("locate", "下载失败");
+            }
+        });
+    }
+
+    public static List<String> getFilesAllName(String path) {
+        File file=new File(path);
+        File[] files=file.listFiles();
+        if (files == null){Log.e("error","空目录");return null;}
+        List<String> s = new ArrayList<>();
+        for(int i =0;i<files.length;i++){
+            s.add(files[i].getAbsolutePath());
+        }
+        return s;
+    }
+
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {

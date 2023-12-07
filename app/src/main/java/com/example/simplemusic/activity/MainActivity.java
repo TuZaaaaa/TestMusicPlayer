@@ -17,6 +17,7 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -91,7 +92,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 final Music music = musicList.get(i);
 
                 //弹出操作对话框
-                final String[] items = new String[] {"添加到播放列表", "删除"};
+                final String[] items = new String[] {"添加到播放列表", "下载到本地", "删除"};
                 AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
                 builder.setTitle(music.title+"-"+music.artist);
 
@@ -103,6 +104,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                 serviceBinder.addPlayList(music);
                                 break;
                             case 1:
+                                LocalMusicActivity.addLocalMusic(MainActivity.this, music);
+                                break;
+                            case 2:
                                 //从列表和数据库中删除
                                 musicList.remove(i);
                                 LitePal.deleteAll(MyMusic.class, "title=?", music.title);

@@ -19,6 +19,8 @@ import com.example.simplemusic.db.PlayingMusic;
 
 import org.litepal.LitePal;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -261,7 +263,17 @@ public class MusicService extends Service {
         try {
             player.reset();
             Log.i("songurl", item.songUrl);
-            player.setDataSource(item.songUrl);
+
+            // 判断音乐来源：网络/本地
+            if (item.songUrl.contains("/storage/emulated/0/music")) {
+                // 来源于本地
+                player.setDataSource((new FileInputStream(item.songUrl)).getFD());
+            } else {
+                // 来源于网络
+                player.setDataSource(item.songUrl);
+            }
+//            player.setDataSource(this, Uri.parse("/storage/emulated/0/music/The Door.mp3"));
+//            player.setDataSource((new FileInputStream("/storage/emulated/0/music/The Door.mp3")).getFD());
             //准备播放音乐
             player.prepare();
         } catch (IOException e) {
