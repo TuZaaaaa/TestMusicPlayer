@@ -260,22 +260,19 @@ public class MusicService extends Service {
     private void prepareToPlay(Music item) {
         try {
             player.reset();
-            //设置播放音乐的地址
-//            Log.i("解析有问题？", "解析歌曲有问题？");
-//            player.setDataSource(MusicService.this, Uri.parse(item.songUrl));
-            player.setDataSource("http://m701.music.126.net/20231206152550/e881f47587e198b42f2509b3da9607da/jdymusic/obj/wo3DlMOGwrbDjj7DisKw/30605259365/639a/9474/6852/a1736ba8cb09c02f83f5f2c745e5f6fb.mp3");
+            Log.i("songurl", item.songUrl);
+            player.setDataSource(item.songUrl);
             //准备播放音乐
             player.prepare();
-//            player.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-//                @Override
-//                public void onPrepared(MediaPlayer mediaPlayer) {
-//                    mediaPlayer.start();
-//                }
-//            });
-
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
+        player.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+            @Override
+            public void onPrepared(MediaPlayer mediaPlayer) {
+                mediaPlayer.start();
+            }
+        });
     }
 
     // 播放音乐，根据reload标志位判断是非需要重新加载音乐
@@ -287,21 +284,12 @@ public class MusicService extends Service {
             return;
         }
 
-        try {
-            player.reset();
-            Log.i("songurl", item.songUrl);
-            player.setDataSource(item.songUrl);
-            //准备播放音乐
-            player.prepare();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        // 如果需要重新加载
+        if (reload) {
+            prepareToPlay(item);
         }
-        player.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-                @Override
-                public void onPrepared(MediaPlayer mediaPlayer) {
-                    mediaPlayer.start();
-                }
-        });
+
+        player.start();
 
         for (OnStateChangeListenr l : listenrList) {
             l.onPlay(item);
