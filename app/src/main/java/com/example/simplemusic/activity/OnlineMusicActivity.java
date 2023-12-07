@@ -435,7 +435,7 @@ public class OnlineMusicActivity extends AppCompatActivity implements View.OnCli
                         message.what = 60;
                         message.obj = music;
                         mainHanlder.sendMessage(message);
-                        Thread.sleep(30);
+                        Thread.sleep(5);
 
                     }
 

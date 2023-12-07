@@ -3,4 +3,8 @@
     <color name="colorPrimary">#008577</color>
     <color name="colorPrimaryDark">#00574B</color>
     <color name="colorAccent">#D81B60</color>
+    <color name="colorPrimary1">#141414</color>
+    <color name="colorPrimaryDark1">#141414</color>
+    <color name="colorAccent1">#C0362E</color>
+    <color name="rippleColor">#C0362E</color>
 </resources>
