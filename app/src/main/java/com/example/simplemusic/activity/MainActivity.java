@@ -17,7 +17,6 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -431,6 +430,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.online_music:
                 Intent intent2 = new Intent(MainActivity.this, OnlineMusicActivity.class);
                 startActivity(intent2);
+                break;
+            case R.id.recognize_music:
+                Intent intent3 = new Intent(MainActivity.this, MusicRecognition.class);
+                startActivity(intent3);
                 break;
             default:
         }
