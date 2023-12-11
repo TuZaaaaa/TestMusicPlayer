@@ -458,7 +458,7 @@ public class LocalMusicActivity extends AppCompatActivity implements View.OnClic
 
             // 添加到列表和数据库
 //            localMusicList.add(0, music);
-            LocalMusic localMusic = new LocalMusic(newSongUrl, music.title, music.artist, newImgUrl, music.isOnlineMusic);
+            LocalMusic localMusic = new LocalMusic(newSongUrl, music.title, music.artist, newImgUrl, false);
             localMusic.save();
 
             try {
