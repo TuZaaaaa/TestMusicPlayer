@@ -204,7 +204,8 @@ public class MusicRecognition extends AppCompatActivity {
         Log.i("locate", String.valueOf(filesAllName.size()));
 
         // 传输文件
-        uploadFile(wavFile, "http://192.168.43.177:3000/upload");
+        uploadFile(wavFile, "http://49.232.214.47:5000/upload");
+//        uploadFile(wavFile, "http://192.168.43.45:5000/upload");
         Log.i("locate", wavFile.getAbsolutePath());
     }
 
