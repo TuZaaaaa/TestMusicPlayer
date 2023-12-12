@@ -25,6 +25,7 @@
         <activity android:name=".activity.OnlineMusicActivity" />
         <activity android:name=".activity.PlayerActivity" />
         <activity android:name=".activity.MusicRecognition" />
+        <activity android:name=".activity.RecognitionMusicList" />
 
 <!--        <activity-->
 <!--            android:name=".activity.Music_recognition"-->

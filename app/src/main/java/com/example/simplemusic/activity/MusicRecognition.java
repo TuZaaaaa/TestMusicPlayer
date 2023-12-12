@@ -7,8 +7,8 @@ import static com.example.simplemusic.config.GlobalConfig.SAMPLE_RATE_INHZ;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
 import android.os.Build;
@@ -22,6 +22,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.simplemusic.R;
 import com.example.simplemusic.util.PcmToWavUtil;
@@ -32,6 +33,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -98,20 +100,27 @@ public class MusicRecognition extends AppCompatActivity {
                 }
             }
         });
+
+        client = new OkHttpClient.Builder()
+                .connectTimeout(10, TimeUnit.SECONDS)//设置连接超时时间
+                .readTimeout(10, TimeUnit.SECONDS)//设置读取超时时间
+                .build();
     }
 
-
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        super.onDestroy();
+        client.dispatcher().cancelAll();
+    }
 
     public void startRecord() {
-//        final int minBufferSize = AudioRecord.getMinBufferSize(SAMPLE_RATE_INHZ, CHANNEL_CONFIG, AUDIO_FORMAT);
-//        audioRecord = new AudioRecord(MediaRecorder.AudioSource.MIC, SAMPLE_RATE_INHZ,
-//                CHANNEL_CONFIG, AUDIO_FORMAT, minBufferSize);
-        int sampleRateInHz = 11025; // 例如，44.1 kHz
-        int channelConfig = AudioFormat.CHANNEL_IN_MONO; // 单声道
-        int audioFormat = AudioFormat.ENCODING_PCM_16BIT; // 16位PCM编码
-        int bufferSizeInBytes = AudioRecord.getMinBufferSize(sampleRateInHz, channelConfig, audioFormat);
+        final int minBufferSize = AudioRecord.getMinBufferSize(SAMPLE_RATE_INHZ, CHANNEL_CONFIG, AUDIO_FORMAT);
+        audioRecord = new AudioRecord(MediaRecorder.AudioSource.MIC, SAMPLE_RATE_INHZ,
+                CHANNEL_CONFIG, AUDIO_FORMAT, minBufferSize);
+        int bufferSizeInBytes = AudioRecord.getMinBufferSize(SAMPLE_RATE_INHZ, CHANNEL_CONFIG, AUDIO_FORMAT);
 
-        AudioRecord audioRecord = new AudioRecord(MediaRecorder.AudioSource.MIC, sampleRateInHz, channelConfig, audioFormat, bufferSizeInBytes);
+        AudioRecord audioRecord = new AudioRecord(MediaRecorder.AudioSource.MIC, SAMPLE_RATE_INHZ, CHANNEL_CONFIG, AUDIO_FORMAT, bufferSizeInBytes);
 
         final byte data[] = new byte[bufferSizeInBytes];
         final File file = new File(getExternalFilesDir(Environment.DIRECTORY_MUSIC), "test.pcm");
@@ -195,7 +204,7 @@ public class MusicRecognition extends AppCompatActivity {
         Log.i("locate", String.valueOf(filesAllName.size()));
 
         // 传输文件
-        uploadFile(wavFile, "http://192.168.204.241:3000/upload");
+        uploadFile(wavFile, "http://192.168.43.177:3000/upload");
         Log.i("locate", wavFile.getAbsolutePath());
     }
 
@@ -229,7 +238,6 @@ public class MusicRecognition extends AppCompatActivity {
 
     // 使用OkHttp上传文件
     private void uploadFile(File file, String url) {
-        OkHttpClient client = new OkHttpClient();
 
         // 构建请求体
         RequestBody requestBody = new MultipartBody.Builder()
@@ -243,6 +251,7 @@ public class MusicRecognition extends AppCompatActivity {
                 .url(url)
                 .post(requestBody)
                 .build();
+        Log.i("locate", "准备发送");
 
         // 异步发送请求
         client.newCall(request).enqueue(new Callback() {
@@ -257,6 +266,12 @@ public class MusicRecognition extends AppCompatActivity {
             public void onResponse(Call call, Response response) throws IOException {
                 // 处理请求成功
                 Log.i("locate", "请求成功");
+                // 待处理
+//                Toast.makeText(MusicRecognition.this, "未识别到音乐，请重新识别", Toast.LENGTH_SHORT).show();
+                String recognition_result = response.body().string();
+                Intent intent = new Intent(MusicRecognition.this, RecognitionMusicList.class);
+                intent.putExtra("data", recognition_result);
+                startActivity(intent);
             }
         });
     }
