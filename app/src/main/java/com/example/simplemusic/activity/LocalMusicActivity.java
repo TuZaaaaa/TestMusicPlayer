@@ -119,12 +119,12 @@ public class LocalMusicActivity extends AppCompatActivity implements View.OnClic
             case R.id.play_all:
                 serviceBinder.addPlayList(localMusicList);
                 break;
-            case R.id.refresh:
-                localMusicList.clear();
-                LitePal.deleteAll(LocalMusic.class);
+//            case R.id.refresh:
+//                localMusicList.clear();
+//                LitePal.deleteAll(LocalMusic.class);
 //                updateTask = new MusicUpdateTask();
 //                updateTask.execute();
-                break;
+//                break;
             case R.id.player:
                 Intent intent = new Intent(LocalMusicActivity.this, PlayerActivity.class);
                 startActivity(intent);
@@ -155,7 +155,7 @@ public class LocalMusicActivity extends AppCompatActivity implements View.OnClic
         //初始化控件
         ImageView btn_playAll = this.findViewById(R.id.play_all);
         musicCountView = this.findViewById(R.id.play_all_title);
-        ImageView btn_refresh = this.findViewById(R.id.refresh);
+//        ImageView btn_refresh = this.findViewById(R.id.refresh);
         musicListView = this.findViewById(R.id.music_list);
         RelativeLayout playerToolView = this.findViewById(R.id.player);
         playingImgView = this.findViewById(R.id.playing_img);
@@ -165,7 +165,7 @@ public class LocalMusicActivity extends AppCompatActivity implements View.OnClic
         ImageView btn_playingList = this.findViewById(R.id.playing_list);
 
         btn_playAll.setOnClickListener(this);
-        btn_refresh.setOnClickListener(this);
+//        btn_refresh.setOnClickListener(this);
         playerToolView.setOnClickListener(this);
         btnPlayOrPause.setOnClickListener(this);
         btn_playingList.setOnClickListener(this);
