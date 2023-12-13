@@ -14,6 +14,7 @@ import android.media.MediaRecorder;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -26,6 +27,10 @@ import android.widget.Toast;
 
 import com.example.simplemusic.R;
 import com.example.simplemusic.util.PcmToWavUtil;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -267,12 +272,27 @@ public class MusicRecognition extends AppCompatActivity {
             public void onResponse(Call call, Response response) throws IOException {
                 // 处理请求成功
                 Log.i("locate", "请求成功");
-                // 待处理
-//                Toast.makeText(MusicRecognition.this, "未识别到音乐，请重新识别", Toast.LENGTH_SHORT).show();
                 String recognition_result = response.body().string();
-                Intent intent = new Intent(MusicRecognition.this, RecognitionMusicList.class);
-                intent.putExtra("data", recognition_result);
-                startActivity(intent);
+
+                try {
+                    Log.i("locate", "解析");
+                    JSONObject recognition_json = new JSONObject(recognition_result);
+                    JSONObject data = recognition_json.getJSONObject("data");
+                    if ("null".equals(data.getString("result"))) {
+                        Log.i("locate", "未识别到音乐");
+                        Looper.prepare();
+                        Toast.makeText(MusicRecognition.this, "未识别到音乐，请重新识别", Toast.LENGTH_SHORT).show();
+                        Looper.loop();
+                    } else {
+                        Intent intent = new Intent(MusicRecognition.this, RecognitionMusicList.class);
+                        intent.putExtra("data", recognition_result);
+                        startActivity(intent);
+                    }
+                } catch (JSONException e) {
+                    throw new RuntimeException(e);
+                }
+
+
             }
         });
     }
