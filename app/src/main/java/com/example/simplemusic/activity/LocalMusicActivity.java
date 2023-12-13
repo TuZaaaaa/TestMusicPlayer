@@ -122,8 +122,8 @@ public class LocalMusicActivity extends AppCompatActivity implements View.OnClic
             case R.id.refresh:
                 localMusicList.clear();
                 LitePal.deleteAll(LocalMusic.class);
-                updateTask = new MusicUpdateTask();
-                updateTask.execute();
+//                updateTask = new MusicUpdateTask();
+//                updateTask.execute();
                 break;
             case R.id.player:
                 Intent intent = new Intent(LocalMusicActivity.this, PlayerActivity.class);
